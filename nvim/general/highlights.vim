@@ -5,7 +5,7 @@ hi Comment cterm=italic
 hi LineNr ctermbg=NONE guibg=NONE
 
 " Lsp diagnostics
-sign define LspDiagnosticsSignError text=• texthl=LspDiagnosticsSignError linehl= numhl=
-sign define LspDiagnosticsSignWarning text=• texthl=LspDiagnosticsSignWarning linehl= numhl=
-sign define LspDiagnosticsSignInformation text=• texthl=LspDiagnosticsSignInformation linehl= numhl=
-sign define LspDiagnosticsSignHint text=• texthl=LspDiagnosticsSignHint linehl= numhl=
+" sign define LspDiagnosticsSignError text=• texthl=LspDiagnosticsSignError linehl= numhl=
+" sign define LspDiagnosticsSignWarning text=• texthl=LspDiagnosticsSignWarning linehl= numhl=
+" sign define LspDiagnosticsSignInformation text=• texthl=LspDiagnosticsSignInformation linehl= numhl=
+" sign define LspDiagnosticsSignHint text=• texthl=LspDiagnosticsSignHint linehl= numhl=

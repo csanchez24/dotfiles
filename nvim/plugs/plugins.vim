@@ -14,12 +14,14 @@ Plug 'itchyny/lightline.vim'
 Plug 'mengelbrecht/lightline-bufferline'
 
 " Better experience when working with Neovim builtin lsp support
-Plug 'neovim/nvim-lspconfig'
-Plug 'nvim-lua/completion-nvim'
+" Plug 'neovim/nvim-lspconfig'
+" Plug 'nvim-lua/completion-nvim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Syntax highlight and more
-Plug 'nvim-treesitter/nvim-treesitter'
-Plug 'nvim-treesitter/nvim-treesitter-refactor'
+Plug 'sheerun/vim-polyglot'
+" Plug 'nvim-treesitter/nvim-treesitter'
+" Plug 'nvim-treesitter/nvim-treesitter-refactor'
 
 " handlebars file support - treesitter does not support file type yet
 Plug 'mustache/vim-mustache-handlebars'
@@ -38,7 +40,7 @@ Plug 'lambdalisue/fern-git-status.vim'
 Plug 'lambdalisue/fern-hijack.vim'
 
 " Formatters
-Plug 'sbdchd/neoformat'
+" Plug 'sbdchd/neoformat'
 
 " Comment out code
 Plug 'tomtom/tcomment_vim'

@@ -11,6 +11,10 @@ require'nvim_lsp'.html.setup{
   filetypes = { "html", "tsx", "jsx", "vue", "hbs", "handlebars", "html.handlebars" } 
 }
 
+require'nvim_lsp'.intelephense.setup{ on_attach = on_attach_vim }
+
+require'nvim_lsp'.sqlls.setup{ on_attach = on_attach_vim }
+
 require'nvim_lsp'.tsserver.setup{ on_attach = on_attach_vim }
 
 require'nvim_lsp'.jsonls.setup{ on_attach = on_attach_vim }

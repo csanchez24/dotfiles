@@ -51,3 +51,5 @@ alias la="exa -la"
 
 # Set TERM back to xterm-256color without italics when working with ssh
 alias ssh='TERM=xterm-256color ssh'
+eval "$(rbenv init -)"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
