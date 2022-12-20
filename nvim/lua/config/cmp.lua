@@ -25,7 +25,7 @@ if is_cmp_present then
 		sources = cmp.config.sources({
 			{ name = "nvim_lsp" }, -- lsp
 			{ name = "luasnip" }, -- snippets
-			{ name = "buffer" }, -- text within current buffer
+			{ name = "buffer", keyword_length = 5 }, -- text within current buffer
 			{ name = "path" }, -- file system paths
 		}),
 		experimental = { ghost_text = false },
