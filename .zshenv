@@ -19,8 +19,10 @@ export FZF_DEFAULT_OPTS="--no-mouse --height 50% -1 --reverse --multi --inline-i
 export FZF_DEFAULT_COMMAND="fd --type f --type l $FD_OPTIONS || git ls-files --cached --others --exclude-standard"
 
 # Add php composer package manager to PATH
-# export PATH="$PATH:$HOME/.composer/vendor/bin"
-# export PATH="$PATH:$HOME/.cargo/bin"
+export PATH="$PATH:$HOME/.composer/vendor/bin"
+export PATH="$PATH:$HOME/.cargo/bin"
+export PATH=$PATH:$HOME/go/bin/
+
 
 # Bat - Alternative to cat with syntax highlighting
 # export BAT_PAGER="less -RF"
