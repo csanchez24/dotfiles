@@ -31,8 +31,8 @@ if is_lspconfig_present then
 				filetypes = { "html", "tsx", "jsx", "vue" },
 			})
 		end,
-		["sumneko_lua"] = function()
-			lspconfig.sumneko_lua.setup({
+		["lua_ls"] = function()
+			lspconfig.lua_ls.setup({
 				capabilities = capabilities,
 				settings = {
 					Lua = {
