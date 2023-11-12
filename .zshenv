@@ -22,6 +22,9 @@ export FZF_DEFAULT_COMMAND="fd --type f --type l $FD_OPTIONS || git ls-files --c
 export PATH="$PATH:$HOME/.composer/vendor/bin"
 export PATH="$PATH:$HOME/.cargo/bin"
 export PATH=$PATH:$HOME/go/bin/
+export PATH="${HOME}/.pyenv/shims:${PATH}"
+
+
 
 
 # Bat - Alternative to cat with syntax highlighting
