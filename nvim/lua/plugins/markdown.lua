@@ -3,7 +3,7 @@
 
 return {
   "MeanderingProgrammer/render-markdown.nvim",
-  ft = { "markdown", "md" }, -- Solo carga en archivos markdown
+  ft = { "markdown" }, -- Solo carga en archivos markdown
   dependencies = {
     "nvim-treesitter/nvim-treesitter",
     "nvim-tree/nvim-web-devicons", -- Opcional, para iconos
@@ -119,7 +119,10 @@ return {
       alignment_indicator = "━",
       head = "RenderMarkdownTableHead",
       row = "RenderMarkdownTableRow",
-      filler = "RenderMarkdownTableFill",
+    },
+
+    latex = {
+      enabled = false,
     },
 
     -- Callouts (> [!NOTE], > [!WARNING], etc)

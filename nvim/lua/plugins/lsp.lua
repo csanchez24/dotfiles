@@ -7,8 +7,21 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   dependencies = {
     -- Mason - LSP installer
-    { "williamboman/mason.nvim", config = true },
-    "williamboman/mason-lspconfig.nvim",
+    {
+      "mason-org/mason.nvim",
+      cmd = "Mason",
+      opts = {
+        ui = {
+          border = "rounded",
+          icons = {
+            package_installed = "✓",
+            package_pending = "➜",
+            package_uninstalled = "✗",
+          },
+        },
+      },
+    },
+    "mason-org/mason-lspconfig.nvim",
     "WhoIsSethDaniel/mason-tool-installer.nvim",
 
     -- Additional tools
@@ -20,20 +33,6 @@ return {
   },
 
   config = function()
-    -- ========================================================================
-    -- Setup Mason first
-    -- ========================================================================
-    require("mason").setup({
-      ui = {
-        border = "rounded",
-        icons = {
-          package_installed = "✓",
-          package_pending = "➜",
-          package_uninstalled = "✗",
-        },
-      },
-    })
-
     -- ========================================================================
     -- LSP Capabilities (with blink.cmp)
     -- ========================================================================
@@ -85,9 +84,13 @@ return {
         -- Diagnostics
         -- ========================================================================
         map("<leader>cd", vim.diagnostic.open_float, "Line [D]iagnostics")
-        map("<leader>cl", vim.diagnostic.setloclist, "[L]ocation List")
-        map("[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
-        map("]d", vim.diagnostic.goto_next, "Next Diagnostic")
+        -- Note: <leader>xL in Trouble handles location list
+        map("[d", function()
+          vim.diagnostic.jump({ count = -1, float = true })
+        end, "Previous Diagnostic")
+        map("]d", function()
+          vim.diagnostic.jump({ count = 1, float = true })
+        end, "Next Diagnostic")
 
         -- ========================================================================
         -- Symbols
@@ -180,6 +183,57 @@ return {
         header = "",
         prefix = "",
       },
+    })
+
+    vim.api.nvim_create_user_command("LspInfo", function()
+      vim.cmd.checkhealth("vim.lsp")
+    end, { desc = "Show LSP health and attached clients" })
+
+    vim.api.nvim_create_user_command("LspStart", function(opts)
+      if opts.args ~= "" then
+        vim.lsp.enable(opts.args)
+      end
+    end, {
+      desc = "Enable an LSP client by name",
+      nargs = "?",
+      complete = function()
+        return vim.tbl_keys(vim.lsp.config._configs or {})
+      end,
+    })
+
+    vim.api.nvim_create_user_command("LspStop", function(opts)
+      local name = opts.args ~= "" and opts.args or nil
+      for _, client in ipairs(vim.lsp.get_clients({ name = name })) do
+        client:stop()
+      end
+    end, {
+      desc = "Stop active LSP clients",
+      nargs = "?",
+      complete = function()
+        local names = {}
+        for _, client in ipairs(vim.lsp.get_clients()) do
+          names[client.name] = true
+        end
+        return vim.tbl_keys(names)
+      end,
+    })
+
+    vim.api.nvim_create_user_command("LspRestart", function(opts)
+      local name = opts.args ~= "" and opts.args or nil
+      for _, client in ipairs(vim.lsp.get_clients({ name = name })) do
+        client:stop()
+        vim.lsp.enable(client.name)
+      end
+    end, {
+      desc = "Restart active LSP clients",
+      nargs = "?",
+      complete = function()
+        local names = {}
+        for _, client in ipairs(vim.lsp.get_clients()) do
+          names[client.name] = true
+        end
+        return vim.tbl_keys(names)
+      end,
     })
 
     -- ========================================================================
@@ -340,36 +394,40 @@ return {
 
       -- SQL
       sqls = {
-        on_attach = function(client, bufnr)
-          require("sqls").on_attach(client, bufnr)
-        end,
+        root_markers = { ".sqls.yml", ".sqls.yaml", "sqls.yml", "sqls.yaml" },
+        single_file_support = false,
       },
     }
 
     -- ========================================================================
     -- Setup servers with Mason
     -- ========================================================================
-    local ensure_installed = vim.tbl_keys(servers or {})
-    vim.list_extend(ensure_installed, {
+    local ensure_lsp_installed = vim.tbl_keys(servers or {})
+    local ensure_tools_installed = {
+      "prettier",
       "stylua", -- Lua formatter
       "shfmt", -- Shell formatter
-    })
+      "ruff", -- Python formatter/import organizer
+      "goimports", -- Go import organizer
+      "sqlfluff", -- SQL formatter/linter
+      "taplo", -- TOML formatter
+      "blade-formatter",
+      "phpcs",
+      "phpcbf",
+    }
 
-    require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+    require("mason-tool-installer").setup({ ensure_installed = ensure_tools_installed })
+
+    for server_name, server in pairs(servers) do
+      server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+      vim.lsp.config(server_name, server)
+    end
 
     require("mason-lspconfig").setup({
-      handlers = {
-        function(server_name)
-          -- Skip jdtls (handled by nvim-jdtls)
-          if server_name == "jdtls" then
-            return
-          end
-
-          local server = servers[server_name] or {}
-          server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-          require("lspconfig")[server_name].setup(server)
-        end,
-      },
+      ensure_installed = ensure_lsp_installed,
+      automatic_enable = vim.tbl_filter(function(server_name)
+        return server_name ~= "sqls"
+      end, ensure_lsp_installed),
     })
   end,
 }

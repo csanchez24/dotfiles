@@ -13,7 +13,6 @@ return {
         override = {
           ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
           ["vim.lsp.util.stylize_markdown"] = true,
-          ["cmp.entry.get_documentation"] = true,
         },
       },
       routes = {
@@ -133,9 +132,7 @@ return {
   {
     "folke/trouble.nvim",
     cmd = { "Trouble" },
-    opts = {
-      use_diagnostic_signs = true,
-    },
+    opts = {},
     keys = {
       {
         "<leader>xx",

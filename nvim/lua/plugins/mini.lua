@@ -10,6 +10,9 @@ return {
     -- Needed for comment functionality with JSX/TSX
     {
       "JoosepAlviste/nvim-ts-context-commentstring",
+      init = function()
+        vim.g.skip_ts_context_commentstring_module = true
+      end,
       opts = { enable_autocmd = false },
     },
   },
@@ -79,11 +82,11 @@ return {
     require("mini.comment").setup({
       options = {
         -- Function to compute custom comment string
-        custom_commentstring = function()
-          -- Use ts-context-commentstring if available
-          local ok, ts_comment = pcall(require, "ts_context_commentstring.internal")
+        custom_commentstring = function(ref_position)
+          local ok, ts_comment = pcall(require, "ts_context_commentstring")
           if ok then
-            return ts_comment.calculate_commentstring() or vim.bo.commentstring
+            local location = ref_position and { ref_position[1] - 1, ref_position[2] - 1 } or nil
+            return ts_comment.calculate_commentstring({ location = location }) or vim.bo.commentstring
           end
           return vim.bo.commentstring
         end,

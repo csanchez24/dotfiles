@@ -1,136 +1,201 @@
--- Treesitter configuration for Neovim
--- Provides syntax highlighting, indentation, text objects, and more
--- https://github.com/nvim-treesitter/nvim-treesitter
+-- Treesitter configuration for Neovim 0.12+
+-- https://github.com/neovim-treesitter/nvim-treesitter
+
+local parsers = {
+	"blade",
+	"bash",
+	"c",
+	"css",
+	"diff",
+	"dockerfile",
+	"ecma",
+	"git_config",
+	"git_rebase",
+	"gitattributes",
+	"gitcommit",
+	"gitignore",
+	"go",
+	"gomod",
+	"gosum",
+	"html",
+	"html_tags",
+	"javascript",
+	"jsdoc",
+	"jsx",
+	"json",
+	"lua",
+	"luadoc",
+	"luap",
+	"markdown",
+	"markdown_inline",
+	"php",
+	"php_only",
+	"phpdoc",
+	"python",
+	"query",
+	"regex",
+	"sql",
+	"toml",
+	"tsx",
+	"typescript",
+	"vim",
+	"vimdoc",
+	"yaml",
+}
+
+local filetypes = {
+	"blade",
+	"bash",
+	"c",
+	"css",
+	"diff",
+	"dockerfile",
+	"git_config",
+	"git_rebase",
+	"gitattributes",
+	"gitcommit",
+	"gitignore",
+	"go",
+	"gomod",
+	"gosum",
+	"html",
+	"javascript",
+	"javascriptreact",
+	"json",
+	"jsonc",
+	"lua",
+	"markdown",
+	"php",
+	"python",
+	"query",
+	"regex",
+	"sql",
+	"toml",
+	"tsx",
+	"typescript",
+	"typescriptreact",
+	"vim",
+	"vimdoc",
+	"yaml",
+}
 
 return {
-	"nvim-treesitter/nvim-treesitter", -- Core Treesitter plugin
-	version = false, -- Use latest remote version
-	build = ":TSUpdate", -- Update parsers on plugin install/update
-	event = "BufRead", -- Load after opening a buffer
-
+	"neovim-treesitter/nvim-treesitter",
+	name = "nvim-treesitter",
+	branch = "main",
+	lazy = false,
+	build = ":TSUpdate",
 	dependencies = {
+		"neovim-treesitter/treesitter-parser-registry",
 		{
-			"nvim-treesitter/nvim-treesitter-textobjects", -- Additional textobject support
-			config = function()
-				-- Override 'goto' mappings in diff mode to use Vim defaults
-				local move = require("nvim-treesitter.textobjects.move")
-				local configs = require("nvim-treesitter.configs")
-				for name, fn in pairs(move) do
-					if name:find("goto") == 1 then
-						move[name] = function(query, ...)
-							if vim.wo.diff then
-								-- If in diff view, run the default keymap instead of TS object query
-								local mod = configs.get_module("textobjects.move")[name] or {}
-								for key, q in pairs(mod) do
-									if query == q and key:find("[%]%[][cC]") then
-										vim.cmd("normal! " .. key)
-										return
-									end
-								end
-							end
-							-- Otherwise, use the original Treesitter move function
-							return fn(query, ...)
-						end
-					end
+			"nvim-treesitter/nvim-treesitter-textobjects",
+			branch = "main",
+			opts = {
+				move = {
+					set_jumps = true,
+				},
+			},
+			config = function(_, opts)
+				local ok_textobjects, textobjects = pcall(require, "nvim-treesitter-textobjects")
+				if not ok_textobjects then
+					return
 				end
+				textobjects.setup(opts)
+
+				local ok_move, move = pcall(require, "nvim-treesitter-textobjects.move")
+				if not ok_move then
+					return
+				end
+
+				local map = function(mode, lhs, rhs, desc)
+					vim.keymap.set(mode, lhs, rhs, { desc = desc })
+				end
+
+				map({ "n", "x", "o" }, "]f", function()
+					move.goto_next_start("@function.outer", "textobjects")
+				end, "Next function start")
+				map({ "n", "x", "o" }, "]F", function()
+					move.goto_next_end("@function.outer", "textobjects")
+				end, "Next function end")
+				map({ "n", "x", "o" }, "[f", function()
+					move.goto_previous_start("@function.outer", "textobjects")
+				end, "Previous function start")
+				map({ "n", "x", "o" }, "[F", function()
+					move.goto_previous_end("@function.outer", "textobjects")
+				end, "Previous function end")
+
+				map({ "n", "x", "o" }, "]c", function()
+					if vim.wo.diff then
+						return vim.cmd("normal! ]c")
+					end
+					move.goto_next_start("@class.outer", "textobjects")
+				end, "Next class start")
+				map({ "n", "x", "o" }, "]C", function()
+					if vim.wo.diff then
+						return vim.cmd("normal! ]C")
+					end
+					move.goto_next_end("@class.outer", "textobjects")
+				end, "Next class end")
+				map({ "n", "x", "o" }, "[c", function()
+					if vim.wo.diff then
+						return vim.cmd("normal! [c")
+					end
+					move.goto_previous_start("@class.outer", "textobjects")
+				end, "Previous class start")
+				map({ "n", "x", "o" }, "[C", function()
+					if vim.wo.diff then
+						return vim.cmd("normal! [C")
+					end
+					move.goto_previous_end("@class.outer", "textobjects")
+				end, "Previous class end")
 			end,
 		},
 	},
+	config = function()
+		require("nvim-treesitter").install(parsers)
 
-	opts = {
-		-- List of languages to ensure parser installation
-		ensure_installed = {
-			"bash",
-			"c",
-			"css",
-			"diff",
-			"dockerfile",
-			"git_config",
-			"git_rebase",
-			"gitattributes",
-			"gitcommit",
-			"gitignore",
-			"go",
-			"gomod",
-			"gosum",
-			"html",
-			"javascript",
-			"jsdoc",
-			"json",
-			"jsonc",
-			"lua",
-			"luadoc",
-			"luap",
-			"markdown",
-			"markdown_inline",
-			"php",
-			"php_only",
-			"phpdoc",
-			"python",
-			"query",
-			"regex",
-			"sql",
-			"toml",
-			"tsx",
-			"typescript",
-			"vim",
-			"vimdoc",
-			"yaml",
-		},
-		auto_install = true, -- Automatically install missing parsers
+		-- Explicitly register tsx parser for typescriptreact filetype
+		-- (nvim-treesitter should do this, but being explicit is safer)
+		vim.treesitter.language.register("tsx", "typescriptreact")
+		vim.treesitter.language.register("javascript", "javascriptreact")
 
-		-- Syntax highlighting powered by Treesitter
-		highlight = {
-			enable = true,
-			-- Additional regex-based highlighting (e.g. for Ruby indent)
-			additional_vim_regex_highlighting = { "ruby" },
-		},
+		-- TSX fix: manually combine query files to avoid broken inheritance chain
+		-- (tsx/highlights.scm uses "; inherits: ecma,jsx,typescript" which doesn't
+		-- resolve correctly in neovim-treesitter main branch)
+		local function set_tsx_highlights()
+			local chunks = {}
 
-		-- Indentation based on Treesitter parse tree
-		indent = {
-			enable = true,
-			disable = { "ruby" }, -- Disable for Ruby due to known issues
-		},
-
-		-- Incremental selection (expand/swap nodes)
-		incremental_selection = {
-			enable = true,
-		},
-
-		-- Textobject movements (functions, classes)
-		textobjects = {
-			move = {
-				enable = true,
-				-- Jump to next start/end of function or class
-				goto_next_start = { ["]f"] = "@function.outer", ["]c"] = "@class.outer" },
-				goto_next_end = { ["]F"] = "@function.outer", ["]C"] = "@class.outer" },
-				goto_previous_start = { ["[f"] = "@function.outer", ["[c"] = "@class.outer" },
-				goto_previous_end = { ["[F"] = "@function.outer", ["[C"] = "@class.outer" },
-			},
-		},
-	},
-
-	config = function(_, opts)
-		-- Remove duplicate entries in ensure_installed list
-		if type(opts.ensure_installed) == "table" then
-			local seen = {}
-			opts.ensure_installed = vim.tbl_filter(function(lang)
-				if seen[lang] then
-					return false
+			for _, lang in ipairs({ "ecma", "jsx", "typescript", "tsx" }) do
+				for _, file in ipairs(vim.api.nvim_get_runtime_file("queries/" .. lang .. "/highlights.scm", true)) do
+					for _, line in ipairs(vim.fn.readfile(file)) do
+						if not line:match("^%s*;%s*inherits:") then
+							table.insert(chunks, line)
+						end
+					end
 				end
-				seen[lang] = true
-				return true
-			end, opts.ensure_installed)
+			end
+
+			local source = table.concat(chunks, "\n")
+			if source ~= "" then
+				pcall(vim.treesitter.query.set, "tsx", "highlights", source)
+			end
 		end
 
-		-- Apply the Treesitter configuration
-		require("nvim-treesitter.configs").setup(opts)
+		set_tsx_highlights()
 
-		-- Create :TSResetHighlight command to re-enable highlighting after edits
-		vim.api.nvim_create_user_command(
-			"TSResetHighlight",
-			"write | edit | TSBufEnable highlight",
-			{ bang = true, desc = "Reset Treesitter highlights" }
-		)
+		vim.api.nvim_create_autocmd("FileType", {
+			group = vim.api.nvim_create_augroup("ag__treesitter", { clear = true }),
+			pattern = filetypes,
+			callback = function(event)
+				vim.treesitter.start(event.buf)
+				vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			end,
+		})
+
+		vim.api.nvim_create_user_command("TSResetHighlight", function()
+			pcall(vim.treesitter.stop, 0)
+			vim.treesitter.start()
+			vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+		end, { desc = "Restart Treesitter highlighting for current buffer" })
 	end,
 }

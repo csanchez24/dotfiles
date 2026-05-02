@@ -10,7 +10,7 @@ return {
     {
       "<leader>cF",
       function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({ async = true, lsp_format = "fallback" })
       end,
       mode = { "n", "v" },
       desc = "Format buffer",
@@ -18,7 +18,7 @@ return {
     {
       "<leader>cf",
       function()
-        require("conform").format({ async = true, lsp_fallback = true })
+        require("conform").format({ async = true, lsp_format = "fallback" })
       end,
       mode = { "n", "v" },
       desc = "Format buffer",
@@ -42,7 +42,7 @@ return {
 
       return {
         timeout_ms = 2000,
-        lsp_fallback = true,
+        lsp_format = "fallback",
       }
     end,
 
@@ -86,7 +86,7 @@ return {
       graphql = { "prettier" },
 
       -- Python
-      python = { "ruff_format", "ruff_organize_imports" },
+      python = { "ruff_format", "ruff_organize_imports", stop_after_first = true },
 
       -- Go
       go = { "goimports", "gofmt" },
@@ -95,7 +95,7 @@ return {
       rust = { "rustfmt" },
 
       -- PHP
-      php = { { "pint", "phpcbf" } },
+      php = { "pint", "phpcbf", stop_after_first = true },
 
       blade = { "blade-formatter" },
 
@@ -152,7 +152,7 @@ return {
           ["end"] = { args.line2, end_line:len() },
         }
       end
-      require("conform").format({ async = true, lsp_fallback = true, range = range })
+      require("conform").format({ async = true, lsp_format = "fallback", range = range })
     end, {
       desc = "Format buffer or range",
       range = true,

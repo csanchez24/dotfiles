@@ -3,7 +3,7 @@
 
 return {
   "saghen/blink.cmp",
-  version = "v0.*",
+  version = "1.*",
   event = "InsertEnter",
 
   dependencies = {
@@ -17,7 +17,6 @@ return {
     keymap = { preset = "enter" },
 
     appearance = {
-      use_nvim_cmp_as_default = true,
       nerd_font_variant = "mono",
     },
 
@@ -38,6 +37,8 @@ return {
       },
       ghost_text = { enabled = false },
     },
+
+    fuzzy = { implementation = "prefer_rust_with_warning" },
   },
 
   opts_extend = { "sources.default" },

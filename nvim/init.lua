@@ -34,10 +34,6 @@ require("lazy").setup({
   spec = {
     -- Simple plugins (no config needed)
     "tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
-    { "numToStr/Comment.nvim", opts = {} }, -- Better commenting (alternativa a mini.comment)
-
-    -- Autopairs (choose one)
-    { "windwp/nvim-autopairs", event = "InsertEnter", config = true },
     { "windwp/nvim-ts-autotag", event = "BufRead", opts = {} },
 
     -- Go support
