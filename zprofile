@@ -1,3 +1,7 @@
+# The following lines were added by Docker Desktop to add commands to your PATH.
+export PATH="$PATH:/Users/carlosjosesanchezespinosa/.docker/bin"
+# End of Docker Desktop section.
+
 # ~/.zprofile
 # Este archivo se carga en LOGIN shells (después de zshenv)
 # Configuraciones que solo necesitan ejecutarse una vez al iniciar sesión

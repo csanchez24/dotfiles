@@ -306,7 +306,14 @@ return {
 
       -- Tailwind
       tailwindcss = {
-        filetypes = { "html", "css", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
+        filetypes = { "astro", "html", "css", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
+        settings = {
+          tailwindCSS = {
+            includeLanguages = {
+              astro = "html",
+            },
+          },
+        },
       },
 
       -- JSON

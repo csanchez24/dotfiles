@@ -162,8 +162,8 @@ return {
 
             ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
             ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
-            ["<C-q>"] = send_selected_to_qflist_and_open,
-            ["<M-q>"] = actions.send_to_qflist + actions.open_qflist,
+            ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
+            ["<C-a>"] = send_selected_to_qflist_and_open,
 
             ["<C-l>"] = actions.complete_tag,
             ["<C-_>"] = actions.which_key, -- keys from pressing <C-/>
@@ -179,8 +179,8 @@ return {
 
             ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
             ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
-            ["<C-q>"] = send_selected_to_qflist_and_open,
-            ["<M-q>"] = actions.send_to_qflist + actions.open_qflist,
+            ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
+            ["<C-a>"] = send_selected_to_qflist_and_open,
 
             ["j"] = actions.move_selection_next,
             ["k"] = actions.move_selection_previous,
