@@ -411,6 +411,7 @@ return {
     -- ========================================================================
     local ensure_lsp_installed = vim.tbl_keys(servers or {})
     local ensure_tools_installed = {
+      "jdtls", -- Java language server (managed by nvim-jdtls, not mason-lspconfig)
       "prettier",
       "stylua", -- Lua formatter
       "shfmt", -- Shell formatter

@@ -2,6 +2,18 @@
 -- Autoformat con conform.nvim
 -- https://github.com/stevearc/conform.nvim
 
+-- Projects that format Java with Prettier ship prettier-plugin-java as a
+-- dependency; the plugin only exists inside such a project, so look for it next
+-- to the buffer. Returning an empty list leaves the buffer to `lsp_format`,
+-- which is jdtls' own Eclipse formatter.
+local function java_formatters(bufnr)
+  local root = vim.fs.root(bufnr, "node_modules")
+  if root and vim.uv.fs_stat(root .. "/node_modules/prettier-plugin-java") then
+    return { "prettier" }
+  end
+  return {}
+end
+
 return {
   "stevearc/conform.nvim",
   event = { "BufWritePre" },
@@ -35,7 +47,7 @@ return {
       end
 
       -- Disable for certain filetypes
-      local disabled_filetypes = { "sql", "java" }
+      local disabled_filetypes = { "sql" }
       if vim.tbl_contains(disabled_filetypes, vim.bo[bufnr].filetype) then
         return
       end
@@ -105,6 +117,9 @@ return {
       -- C/C++
       c = { "clang_format" },
       cpp = { "clang_format" },
+
+      -- Java
+      java = java_formatters,
 
       -- Use a sub-list to run ONLY the first available formatter
       -- javascript = { { "prettierd", "prettier" } },

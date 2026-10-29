@@ -3,8 +3,12 @@ local function get_jdtls()
 	local jdtls_path = vim.fn.expand("$MASON/packages/jdtls")
 	-- Obtain the path to the jar which runs the language server
 	local launcher = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-	-- Declare white operating system we are using, windows use win, macos use mac
+	-- Declare which OS/arch config to use. On Apple Silicon jdtls ships a
+	-- dedicated config_mac_arm; use it so the correct native bundles load.
 	local SYSTEM = "mac"
+	if vim.loop.os_uname().machine == "arm64" then
+		SYSTEM = "mac_arm"
+	end
 	-- Obtain the path to configuration files for your specific operating system
 	local config = jdtls_path .. "/config_" .. SYSTEM
 	-- Obtain the path to the Lomboc jar
@@ -22,6 +26,25 @@ local function get_workspace()
 	local workspace_dir = home .. "/.local/share/jdtls/" .. project_name
 
 	return workspace_dir
+end
+
+local function find_gradle_java_home()
+	-- Run the Gradle daemon on the JDK the project actually targets instead of
+	-- whatever `java` is on PATH. The foojay-resolver downloads the toolchain
+	-- JDK under ~/.gradle/jdks, so reuse it: this keeps the language server's
+	-- model in step with the command line and avoids cross-version warnings.
+	-- Prefer JDK 26, then 25. Returns nil if none found (falls back to PATH).
+	for _, major in ipairs({ "26", "25" }) do
+		local matches = vim.fn.glob(
+			vim.env.HOME .. "/.gradle/jdks/*-" .. major .. "-*/*/Contents/Home",
+			true,
+			true
+		)
+		if matches[1] then
+			return matches[1]
+		end
+	end
+	return nil
 end
 
 local function java_keymaps()
@@ -121,7 +144,7 @@ local function setup_jdtls()
 		"-Declipse.product=org.eclipse.jdt.ls.core.product",
 		"-Dlog.protocol=true",
 		"-Dlog.level=ALL",
-		"-Xmx1g",
+		"-Xmx2g",
 		-- '--enable-native-access=ALL-UNNAMED',
 		"--add-modules=ALL-SYSTEM",
 		"--add-opens",
@@ -140,7 +163,11 @@ local function setup_jdtls()
 	-- Configure settings in the JDTLS server
 	local settings = {
 		java = {
-			home = "/usr/libexec/java_home",
+			-- Do NOT hardcode java.home here. jdtls runs on whichever `java` is
+			-- on PATH (Homebrew JDK 27), and discovers the project's JDK from the
+			-- Gradle toolchain (JavaLanguageVersion 26, auto-provisioned by the
+			-- foojay resolver). If imports ever fail against JDK 26, add a
+			-- `configuration.runtimes` entry pointing at an installed JDK.
 			-- classPath = {
 			--   -- Add paths to your desired classpath entries here
 			--   -- vim.fn.getcwd() .. '/libs/mwave_sdk.jar',
@@ -155,11 +182,10 @@ local function setup_jdtls()
 				--   ['org.eclipse.jdt.core.formatter.tabulation.char'] = 'space',
 				--   ['org.eclipse.jdt.core.formatter.tabulation.size'] = 2,
 				-- },
-				-- Use the Google Style guide for code formatting
-				settings = {
-					url = "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
-					profile = "GoogleStyle",
-				},
+				-- No profile: jdtls uses its built-in Eclipse defaults. Google removed
+				-- eclipse-java-google-style.xml from the styleguide repo, so pointing
+				-- `url` at it only logged a 404 on every start. To restore Google Style,
+				-- save a copy of the XML locally and set `url` to that file path.
 			},
 			-- Enable downloading archives from eclipse automatically
 			eclipse = {
@@ -168,6 +194,30 @@ local function setup_jdtls()
 			-- Enable downloading archives from maven automatically
 			maven = {
 				downloadSources = true,
+			},
+			-- Gradle import: run the Gradle daemon on a JDK that Gradle supports.
+			-- `java.home` here points the daemon at the foojay-provisioned JDK 26
+			-- (nil = fall back to the PATH java).
+			import = {
+				gradle = {
+					enabled = true,
+					wrapper = {
+						enabled = true,
+					},
+					-- jdtls injects an init script that reads each project's
+					-- `annotationProcessor` configuration while building its model.
+					-- Gradle 9.x refuses that ("Resolution of the configuration
+					-- ':app:annotationProcessor' was attempted without an exclusive
+					-- lock") and the whole import fails, leaving every type unresolved.
+					-- Disabling the patch costs nothing unless a project uses
+					-- annotation processors such as Lombok or MapStruct.
+					annotationProcessing = {
+						enabled = false,
+					},
+					java = {
+						home = find_gradle_java_home(),
+					},
+				},
 			},
 			-- Enable method signature help
 			signatureHelp = {
