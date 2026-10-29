@@ -1,5 +1,5 @@
 -- Treesitter configuration for Neovim 0.12+
--- https://github.com/neovim-treesitter/nvim-treesitter
+-- https://github.com/nvim-treesitter/nvim-treesitter
 
 local parsers = {
 	"blade",
@@ -80,13 +80,12 @@ local filetypes = {
 }
 
 return {
-	"neovim-treesitter/nvim-treesitter",
+	"nvim-treesitter/nvim-treesitter",
 	name = "nvim-treesitter",
 	branch = "main",
 	lazy = false,
 	build = ":TSUpdate",
 	dependencies = {
-		"neovim-treesitter/treesitter-parser-registry",
 		{
 			"nvim-treesitter/nvim-treesitter-textobjects",
 			branch = "main",
@@ -161,7 +160,7 @@ return {
 
 		-- TSX fix: manually combine query files to avoid broken inheritance chain
 		-- (tsx/highlights.scm uses "; inherits: ecma,jsx,typescript" which doesn't
-		-- resolve correctly in neovim-treesitter main branch)
+		-- did not resolve correctly in the previous neovim-treesitter fork)
 		local function set_tsx_highlights()
 			local chunks = {}
 
